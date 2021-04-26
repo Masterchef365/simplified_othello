@@ -144,6 +144,20 @@ impl Board {
     pub fn get_mut(&mut self, x: usize, y: usize) -> Option<&mut Square> {
         self.0.get_mut(Self::coord(x, y)?)
     }
+
+    /// Return scores of (Dark, Light)
+    pub fn scores(&self) -> (usize, usize) {
+        let mut dark = 0;
+        let mut light = 0;
+        for sq in &self.0 {
+            match sq {
+                Square::Dark => dark += 1,
+                Square::Light => light += 1,
+                Square::Empty => ()
+            }
+        }
+        (dark, light)
+    }
 }
 
 impl State {
