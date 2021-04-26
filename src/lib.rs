@@ -79,11 +79,11 @@ impl State {
         let mut board = Board::empty();
 
         // Center pattern
-        let (tlx, tly) = (WIDTH / 2, HEIGHT / 2);
-        *board.get_mut(tlx, tly).unwrap() = Square::Light;
-        *board.get_mut(tlx + 1, tly).unwrap() = Square::Dark;
-        *board.get_mut(tlx + 1, tly + 1).unwrap() = Square::Light;
-        *board.get_mut(tlx, tly + 1).unwrap() = Square::Dark;
+        let (brx, bry) = (WIDTH / 2, HEIGHT / 2);
+        *board.get_mut(brx, bry - 1).unwrap() = Square::Light;
+        *board.get_mut(brx - 1, bry - 1).unwrap() = Square::Dark;
+        *board.get_mut(brx - 1, bry).unwrap() = Square::Light;
+        *board.get_mut(brx, bry).unwrap() = Square::Dark;
 
         Self {
             board,
@@ -92,13 +92,50 @@ impl State {
     }
 }
 
-/*
 impl fmt::Display for Square {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "({}, {})", self.x, self.y)
+        f.write_str(match self {
+            Square::Dark => "X",
+            Square::Light => "O",
+            Square::Empty => ".",
+        })
     }
 }
-*/
+
+impl fmt::Display for Player {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(match self {
+            Player::Dark => "Dark (X)",
+            Player::Light => "Light (O)",
+        })
+    }
+}
+
+impl fmt::Display for Board {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        for row in (0..HEIGHT).rev() {
+            write!(f, "{}:|", row)?;
+            for col in 0..WIDTH {
+                write!(f, " {}", self.get(col, row).unwrap())?;
+            }
+            writeln!(f)?;
+        }
+
+        write!(f, "   ")?;
+        for _ in 0..WIDTH {
+            write!(f, "--")?;
+        }
+        writeln!(f)?;
+
+        write!(f, "   ")?;
+        for col in 0..WIDTH {
+            write!(f, " {}", col)?;
+        }
+        writeln!(f)
+    }
+}
+
+
 
 /*
 enum Direction {
