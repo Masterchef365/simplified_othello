@@ -1,5 +1,7 @@
 use othello::*;
 fn main() {
-    let mut state = State::new();
-    println!("{}", state.board);
+    let state = State::new();
+    for (_mov, state) in legal_moves(state) {
+        println!("{}", state.board);
+    }
 }

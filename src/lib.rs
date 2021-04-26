@@ -1,4 +1,5 @@
 use std::fmt;
+use std::convert::TryInto;
 
 #[derive(Copy, Clone, Debug)]
 pub enum Player {
@@ -24,16 +25,65 @@ pub const HEIGHT: usize = 4;
 
 pub type Move = (usize, usize);
 
-pub fn legal_moves(state: &State) -> Vec<(Move, State)> {
+/// Returns all legal moves from this state
+pub fn legal_moves(state: State) -> Vec<(Move, State)> {
     let mut moves = Vec::new();
-    for row in 0..WIDTH {
-        for col in 0..HEIGHT {
-            for &(dx, dy) in &DIRECTIONS {
-
+    for y in 0..WIDTH {
+        for x in 0..HEIGHT {
+            if let Some(&Square::Empty) = state.board.get(x, y) {
+                moves.extend(legal_moves_pos(state, x, y).map(|state| ((x, y), state)));
             }
         }
     }
     moves
+}
+
+fn legal_moves_pos(state: State, x: usize, y: usize) -> impl Iterator<Item = State> {
+    DIRECTIONS
+        .iter()
+        .filter_map(move |&dir| legal_move_dir(state, x, y, dir))
+}
+
+fn legal_move_dir(mut state: State, mut x: usize, mut y: usize, (dx, dy): (isize, isize)) -> Option<State> {
+    let mut saw_opposite = false;
+
+    // Optimistically set the square
+    *state.board.get_mut(x, y).unwrap() = match state.next_player {
+        Player::Dark => Square::Dark,
+        Player::Light => Square::Light,
+    };
+
+    // Step along the direction vector
+    loop {
+        // Go to the next square, or return None if out of bounds
+        x = (x as isize + dx).try_into().ok()?;
+        y = (y as isize + dy).try_into().ok()?;
+        let square = state.board.get_mut(x, y)?;
+        match (square, state.next_player) {
+            // No anchor
+            (Square::Empty, _) => return None,
+            // We've met another square opposite our color, set it opposite
+            (s@Square::Dark, Player::Light) => {
+                saw_opposite = true;
+                *s = Square::Light;
+            }
+            (s@Square::Light, Player::Dark) => {
+                saw_opposite = true;
+                *s = Square::Dark;
+            }
+            // We've met our anchor
+            (Square::Light, Player::Light) => {
+                if saw_opposite {
+                    return Some(state);
+                }
+            }
+            (Square::Dark, Player::Dark) => {
+                if saw_opposite {
+                    return Some(state);
+                }
+            }
+        }
+    }
 }
 
 const DIRECTIONS: [(isize, isize); 8] = [
@@ -134,33 +184,3 @@ impl fmt::Display for Board {
         writeln!(f)
     }
 }
-
-
-
-/*
-enum Direction {
-    N,
-    NE,
-    E,
-    SE,
-    S,
-    SW,
-    W,
-    NW,
-}
-
-impl Direction {
-    pub fn vector(&self) -> (isize, isize) {
-        match self {
-            Self::N => (0, 1),
-            Self::NE => (1, 1),
-            Self::E => (1, 0),
-            Self::SE => (1, -1),
-            Self::S => (0, -1),
-            Self::SW => (-1, -1),
-            Self::W => (-1, 0),
-            Self::NW => (-1, 1),
-        }
-    }
-}
-*/
