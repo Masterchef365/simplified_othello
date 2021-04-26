@@ -7,6 +7,16 @@ pub enum Player {
     Light,
 }
 
+impl Player {
+    /// Yin and yang...
+    pub fn opposite(self) -> Self {
+        match self {
+            Self::Dark => Self::Light,
+            Self::Light => Self::Dark,
+        }
+    }
+}
+
 #[derive(Copy, Clone, Debug)]
 pub enum Square {
     Dark,
@@ -20,13 +30,14 @@ pub struct State {
     pub next_player: Player,
 }
 
-pub const WIDTH: usize = 8;
-pub const HEIGHT: usize = 8;
+pub const WIDTH: usize = 4;
+pub const HEIGHT: usize = 4;
 
 pub type Move = (usize, usize);
+pub type Successor = (Move, State);
 
 /// Returns all legal moves from this state
-pub fn legal_moves(state: State) -> Vec<(Move, State)> {
+pub fn legal_moves(state: State) -> Vec<Successor> {
     let mut moves = Vec::new();
     for y in 0..WIDTH {
         for x in 0..HEIGHT {
