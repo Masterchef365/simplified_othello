@@ -1,5 +1,5 @@
-use std::fmt;
 use std::convert::TryInto;
+use std::fmt;
 
 #[derive(Copy, Clone, Debug)]
 pub enum Player {
@@ -20,8 +20,8 @@ pub struct State {
     pub next_player: Player,
 }
 
-pub const WIDTH: usize = 4;
-pub const HEIGHT: usize = 4;
+pub const WIDTH: usize = 8;
+pub const HEIGHT: usize = 8;
 
 pub type Move = (usize, usize);
 
@@ -44,10 +44,16 @@ fn legal_moves_pos(state: State, x: usize, y: usize) -> impl Iterator<Item = Sta
         .filter_map(move |&dir| legal_move_dir(state, x, y, dir))
 }
 
-fn legal_move_dir(mut state: State, mut x: usize, mut y: usize, (dx, dy): (isize, isize)) -> Option<State> {
+/// Legal moves starting from `state`, position (x, y), and moving along the (dx, dy) diagonal
+fn legal_move_dir(
+    mut state: State,
+    mut x: usize,
+    mut y: usize,
+    (dx, dy): (isize, isize),
+) -> Option<State> {
     let mut saw_opposite = false;
 
-    // Optimistically set the square
+    // Optimistically set the current square to our color, and game state to the opposite
     *state.board.get_mut(x, y).unwrap() = match state.next_player {
         Player::Dark => Square::Dark,
         Player::Light => Square::Light,
@@ -63,23 +69,29 @@ fn legal_move_dir(mut state: State, mut x: usize, mut y: usize, (dx, dy): (isize
             // No anchor
             (Square::Empty, _) => return None,
             // We've met another square opposite our color, set it opposite
-            (s@Square::Dark, Player::Light) => {
+            (s @ Square::Dark, Player::Light) => {
                 saw_opposite = true;
                 *s = Square::Light;
             }
-            (s@Square::Light, Player::Dark) => {
+            (s @ Square::Light, Player::Dark) => {
                 saw_opposite = true;
                 *s = Square::Dark;
             }
             // We've met our anchor
             (Square::Light, Player::Light) => {
                 if saw_opposite {
+                    state.next_player = Player::Dark;
                     return Some(state);
+                } else {
+                    return None;
                 }
             }
             (Square::Dark, Player::Dark) => {
                 if saw_opposite {
+                    state.next_player = Player::Light;
                     return Some(state);
+                } else {
+                    return None;
                 }
             }
         }
@@ -184,3 +196,12 @@ impl fmt::Display for Board {
         writeln!(f)
     }
 }
+
+impl fmt::Display for State {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "{}", self.board)?;
+        writeln!(f, "{} to play.", self.next_player)
+    }
+}
+
+
