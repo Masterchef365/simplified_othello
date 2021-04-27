@@ -1,8 +1,18 @@
 use othello::*;
 use std::cmp::Ordering;
 use std::io::Write;
+use std::str::FromStr;
 
 fn main() {
+    // Arg parsing
+    let mut args = std::env::args();
+    let program_name = args.next().unwrap();
+    let usage = format!("Usage: {} <Dark player> <Light player>", program_name);
+    let player_err = "Player type must be `minimax` or `human`";
+    let dark_player: PlayerType = args.next().expect(&usage).parse().expect(player_err);
+    let light_player: PlayerType = args.next().expect(&usage).parse().expect(player_err);
+
+    // Play the game
     let mut state = State::new();
     loop {
         println!("{}", state);
@@ -22,9 +32,16 @@ fn main() {
             state.last_skipped = false;
         }
 
+        // Ply
         state = match state.next_player {
-            Player::Dark => dumb_player(&legal),
-            Player::Light => dumb_player(&legal),
+            Player::Dark => match dark_player {
+                PlayerType::Human => human_player(&legal),
+                PlayerType::Minimax => minimax(state),
+            },
+            Player::Light => match light_player {
+                PlayerType::Human => human_player(&legal),
+                PlayerType::Minimax => minimax(state),
+            },
         }
     }
 
@@ -39,10 +56,12 @@ fn main() {
     }
 }
 
+/*
 fn dumb_player(legal_moves: &[Successor]) -> State {
     println!("Machine played.");
     legal_moves.get(0).map(|(_, s)| *s).unwrap()
 }
+*/
 
 fn human_player(legal_moves: &[Successor]) -> State {
     loop {
@@ -66,6 +85,23 @@ fn prompt_int(prompt: &str) -> usize {
         match s.trim_end().parse() {
             Ok(i) => break i,
             Err(_) => eprintln!("Please input an integer."),
+        }
+    }
+}
+
+enum PlayerType {
+    Human,
+    Minimax,
+}
+
+impl FromStr for PlayerType {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "human" => Ok(Self::Human),
+            "minimax" => Ok(Self::Minimax),
+            _ => Err(()),
         }
     }
 }

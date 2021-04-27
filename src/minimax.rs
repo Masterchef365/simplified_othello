@@ -1,6 +1,6 @@
 use crate::{legal_moves, Board, Player, State};
 
-pub fn minimax(state: State) -> Option<State> {
+pub fn minimax(state: State) -> State {
     let player = state.next_player;
     let mut best = None;
     let mut best_score = std::isize::MIN;
@@ -11,7 +11,7 @@ pub fn minimax(state: State) -> Option<State> {
             best_score = score;
         }
     }
-    best
+    best.expect("Failed to find successor state...")
 }
 
 fn min_value(state: State, player: Player) -> isize {

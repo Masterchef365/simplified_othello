@@ -1,6 +1,7 @@
 use std::convert::TryInto;
 use std::fmt;
-pub mod minimax;
+mod minimax;
+pub use minimax::minimax;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum Player {
