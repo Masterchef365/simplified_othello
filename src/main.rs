@@ -24,6 +24,7 @@ fn main() {
             println!("No valid moves");
             state.next_player = state.next_player.opposite();
             if state.last_skipped {
+                println!("No valid moves for either player");
                 break;
             }
             state.last_skipped = true;
