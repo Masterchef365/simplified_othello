@@ -41,6 +41,7 @@ pub type Move = (usize, usize);
 pub type Successor = (Move, State);
 
 /// Returns all legal moves from this state
+/// Also called the successor function
 pub fn legal_moves(state: State) -> Vec<Successor> {
     let mut moves = Vec::new();
     for y in 0..HEIGHT {

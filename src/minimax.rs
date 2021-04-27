@@ -1,5 +1,7 @@
 use crate::{legal_moves, Board, Player, State};
 
+/// Implements the minimax descision function
+/// Returns a sucessor state for `next_player`
 pub fn minimax(state: State) -> State {
     let player = state.next_player;
     let mut best = None;
@@ -11,9 +13,10 @@ pub fn minimax(state: State) -> State {
             best_score = score;
         }
     }
-    best.expect("Failed to find successor state...")
+    best.expect("Failed to find successor state, this should be unreachable...")
 }
 
+/// Implements the minimax min-value function
 fn min_value(state: State, player: Player) -> isize {
     let successors = legal_moves(state);
 
@@ -35,6 +38,7 @@ fn min_value(state: State, player: Player) -> isize {
     }
 }
 
+/// Implements the minimax max-value function
 fn max_value(state: State, player: Player) -> isize {
     let successors = legal_moves(state);
 
