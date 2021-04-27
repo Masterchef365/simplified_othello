@@ -1,7 +1,8 @@
 use std::convert::TryInto;
 use std::fmt;
+pub mod minimax;
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum Player {
     Dark,
     Light,
