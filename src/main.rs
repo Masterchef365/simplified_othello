@@ -1,4 +1,6 @@
 use othello::*;
+use std::cmp::Ordering;
+use std::io::Write;
 
 fn main() {
     let mut last_had_no_move = false;
@@ -22,7 +24,7 @@ fn main() {
         }
 
         state = match state.next_player {
-            Player::Dark => dumb_player(&legal),
+            Player::Dark => human_player(&legal),
             Player::Light => dumb_player(&legal),
         }
     }
@@ -31,8 +33,40 @@ fn main() {
     println!("Game ended, scores:");
     println!("\tDark: {}", dark);
     println!("\tLight: {}", light);
+    match dark.cmp(&light) {
+        Ordering::Less => println!("Light wins!"),
+        Ordering::Greater => println!("Dark wins!"),
+        Ordering::Equal => println!("Tie!"),
+    }
 }
 
 fn dumb_player(legal_moves: &[Successor]) -> State {
+    println!("Machine played.");
     legal_moves.get(0).map(|(_, s)| *s).unwrap()
+}
+
+fn human_player(legal_moves: &[Successor]) -> State {
+    loop {
+        let col = prompt_int("Enter col: ");
+        let row = prompt_int("Enter row: ");
+        match legal_moves.iter().find(|(pos, _)| *pos == (col, row)) {
+            Some((_, s)) => break *s,
+            None => println!("Invalid move! Please select another."),
+        };
+    }
+}
+
+fn prompt_int(prompt: &str) -> usize {
+    loop {
+        print!("{}", prompt);
+        std::io::stdout().lock().flush().unwrap();
+        let mut s = String::new();
+        std::io::stdin()
+            .read_line(&mut s)
+            .expect("Failed to read line");
+        match s.trim_end().parse() {
+            Ok(i) => break i,
+            Err(_) => eprintln!("Please input an integer."),
+        }
+    }
 }
