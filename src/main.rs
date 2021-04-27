@@ -3,7 +3,6 @@ use std::cmp::Ordering;
 use std::io::Write;
 
 fn main() {
-    let mut last_had_no_move = false;
     let mut state = State::new();
     loop {
         println!("{}", state);
@@ -14,17 +13,17 @@ fn main() {
         if legal.is_empty() {
             println!("No valid moves");
             state.next_player = state.next_player.opposite();
-            if last_had_no_move {
+            if state.last_skipped {
                 break;
             }
-            last_had_no_move = true;
+            state.last_skipped = true;
             continue;
         } else {
-            last_had_no_move = false;
+            state.last_skipped = false;
         }
 
         state = match state.next_player {
-            Player::Dark => human_player(&legal),
+            Player::Dark => dumb_player(&legal),
             Player::Light => dumb_player(&legal),
         }
     }

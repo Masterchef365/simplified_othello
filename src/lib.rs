@@ -29,6 +29,8 @@ pub enum Square {
 pub struct State {
     pub board: Board,
     pub next_player: Player,
+    /// Whether or not the last player skipped playing
+    pub last_skipped: bool,
 }
 
 pub const WIDTH: usize = 4;
@@ -176,6 +178,7 @@ impl State {
         Self {
             board,
             next_player: Player::Dark,
+            last_skipped: false,
         }
     }
 }
