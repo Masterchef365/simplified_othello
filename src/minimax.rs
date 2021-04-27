@@ -16,10 +16,12 @@ pub fn minimax(state: State) -> State {
 
 fn min_value(state: State, player: Player) -> isize {
     let successors = legal_moves(state);
+
     let min = successors
         .into_iter()
         .map(|(_, state)| max_value(state, player))
         .min();
+
     if let Some(min) = min {
         return min;
     } else {
@@ -35,12 +37,14 @@ fn min_value(state: State, player: Player) -> isize {
 
 fn max_value(state: State, player: Player) -> isize {
     let successors = legal_moves(state);
-    let min = successors
+
+    let max = successors
         .into_iter()
         .map(|(_, state)| min_value(state, player))
-        .min();
-    if let Some(min) = min {
-        return min;
+        .max();
+
+    if let Some(max) = max {
+        return max;
     } else {
         let mut state = state;
         state.next_player = state.next_player.opposite();
