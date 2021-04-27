@@ -43,8 +43,8 @@ pub type Successor = (Move, State);
 /// Returns all legal moves from this state
 pub fn legal_moves(state: State) -> Vec<Successor> {
     let mut moves = Vec::new();
-    for y in 0..WIDTH {
-        for x in 0..HEIGHT {
+    for y in 0..HEIGHT {
+        for x in 0..WIDTH {
             if let Some(state) = legal_move_pos(state, x, y) {
                 moves.push(((x, y), state));
             }
