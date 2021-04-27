@@ -5,12 +5,20 @@ pub fn minimax(state: State) -> State {
     let mut best = None;
     let mut best_score = isize::MIN;
 
-    let (mut alpha, mut beta) = (isize::MIN, isize::MAX);
-    for (_, state) in legal_moves(state) {
-        let score = min_value(state, player, &mut alpha, &mut beta);
-        if score > best_score {
-            best = Some(state);
-            best_score = score;
+    let legal_moves = legal_moves(state);
+    let n_processes = 4;
+    for batch in legal_moves.chunks(n_processes) {
+        let threads = batch.iter().map(|&(_, state)| std::thread::spawn(move || {
+            let (mut alpha, mut beta) = (isize::MIN, isize::MAX);
+            let score = min_value(state, player, &mut alpha, &mut beta);
+            (state, score)
+        })).collect::<Vec<_>>();
+        for th in threads {
+            let (state, score) = th.join().unwrap();
+            if score > best_score {
+                best = Some(state);
+                best_score = score;
+            }
         }
     }
     best.expect("Failed to find successor state...")

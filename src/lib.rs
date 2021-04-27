@@ -34,8 +34,8 @@ pub struct State {
     pub last_skipped: bool,
 }
 
-pub const WIDTH: usize = 4;
-pub const HEIGHT: usize = 4;
+pub const WIDTH: usize = 5;
+pub const HEIGHT: usize = 5;
 
 pub type Move = (usize, usize);
 pub type Successor = (Move, State);
