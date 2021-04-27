@@ -3,9 +3,11 @@ use crate::{legal_moves, Board, Player, State};
 pub fn minimax(state: State) -> State {
     let player = state.next_player;
     let mut best = None;
-    let mut best_score = std::isize::MIN;
+    let mut best_score = isize::MIN;
+
+    let (mut alpha, mut beta) = (isize::MIN, isize::MAX);
     for (_, state) in legal_moves(state) {
-        let score = min_value(state, player);
+        let score = min_value(state, player, &mut alpha, &mut beta);
         if score > best_score {
             best = Some(state);
             best_score = score;
@@ -14,15 +16,20 @@ pub fn minimax(state: State) -> State {
     best.expect("Failed to find successor state...")
 }
 
-fn min_value(state: State, player: Player) -> isize {
+fn min_value(state: State, player: Player, alpha: &mut isize, beta: &mut isize) -> isize {
     let successors = legal_moves(state);
 
-    let min = successors
-        .into_iter()
-        .map(|(_, state)| max_value(state, player))
-        .min();
+    let mut min = isize::MAX;
+    for (_, succ) in successors {
+        min = min.min(max_value(succ, player, alpha, beta));
+        if min <= *alpha {
+            return min;
+        } else {
+            *alpha = (*alpha).min(min);
+        }
+    }
 
-    if let Some(min) = min {
+    if min != isize::MAX {
         return min;
     } else {
         let mut state = state;
@@ -31,19 +38,24 @@ fn min_value(state: State, player: Player) -> isize {
             return utility(state.board, player);
         }
         state.last_skipped = true;
-        return max_value(state, player);
+        return max_value(state, player, alpha, beta);
     }
 }
 
-fn max_value(state: State, player: Player) -> isize {
+fn max_value(state: State, player: Player, alpha: &mut isize, beta: &mut isize) -> isize {
     let successors = legal_moves(state);
 
-    let max = successors
-        .into_iter()
-        .map(|(_, state)| min_value(state, player))
-        .max();
+    let mut max = isize::MIN;
+    for (_, succ) in successors {
+        max = max.max(min_value(succ, player, alpha, beta));
+        if max >= *beta {
+            return max;
+        } else {
+            *beta = (*beta).max(max);
+        }
+    }
 
-    if let Some(max) = max {
+    if max != isize::MIN {
         return max;
     } else {
         let mut state = state;
@@ -52,7 +64,7 @@ fn max_value(state: State, player: Player) -> isize {
             return utility(state.board, player);
         }
         state.last_skipped = true;
-        return min_value(state, player);
+        return min_value(state, player, alpha, beta);
     }
 }
 
