@@ -45,18 +45,40 @@ pub fn legal_moves(state: State) -> Vec<Successor> {
     let mut moves = Vec::new();
     for y in 0..WIDTH {
         for x in 0..HEIGHT {
-            if let Some(&Square::Empty) = state.board.get(x, y) {
-                moves.extend(legal_moves_pos(state, x, y).map(|state| ((x, y), state)));
+            if let Some(state) = legal_move_pos(state, x, y) {
+                moves.push(((x, y), state));
             }
         }
     }
     moves
 }
 
-fn legal_moves_pos(state: State, x: usize, y: usize) -> impl Iterator<Item = State> {
-    DIRECTIONS
-        .iter()
-        .filter_map(move |&dir| legal_move_dir(state, x, y, dir))
+fn legal_move_pos(mut state: State, x: usize, y: usize) -> Option<State> {
+    // Optimistically set the current square to our color, and game state to the opposite
+    match state.board.get_mut(x, y)? {
+        s@Square::Empty => {
+            *s = match state.next_player {
+                Player::Dark => Square::Dark,
+                Player::Light => Square::Light,
+            };
+        }
+        _ => return None,
+    }
+
+    let mut is_legal = false;
+    for &dir in &DIRECTIONS {
+        if let Some(part) = legal_move_dir(state, x, y, dir) {
+            is_legal = true;
+            state = part;
+        }
+    }
+
+    if is_legal {
+        state.next_player = state.next_player.opposite();
+        Some(state)
+    } else {
+        None
+    }
 }
 
 /// Legal moves starting from `state`, position (x, y), and moving along the (dx, dy) diagonal
@@ -67,12 +89,6 @@ fn legal_move_dir(
     (dx, dy): (isize, isize),
 ) -> Option<State> {
     let mut saw_opposite = false;
-
-    // Optimistically set the current square to our color, and game state to the opposite
-    *state.board.get_mut(x, y).unwrap() = match state.next_player {
-        Player::Dark => Square::Dark,
-        Player::Light => Square::Light,
-    };
 
     // Step along the direction vector
     loop {
@@ -95,7 +111,6 @@ fn legal_move_dir(
             // We've met our anchor
             (Square::Light, Player::Light) => {
                 if saw_opposite {
-                    state.next_player = Player::Dark;
                     return Some(state);
                 } else {
                     return None;
@@ -103,7 +118,6 @@ fn legal_move_dir(
             }
             (Square::Dark, Player::Dark) => {
                 if saw_opposite {
-                    state.next_player = Player::Light;
                     return Some(state);
                 } else {
                     return None;
