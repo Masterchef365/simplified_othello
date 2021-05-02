@@ -3,7 +3,7 @@ use std::fmt;
 mod minimax;
 pub use minimax::minimax;
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub enum Player {
     Dark,
     Light,
@@ -19,14 +19,14 @@ impl Player {
     }
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub enum Square {
     Dark,
     Light,
     Empty,
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct State {
     pub board: Board,
     pub next_player: Player,
@@ -140,8 +140,8 @@ const DIRECTIONS: [(isize, isize); 8] = [
 ];
 
 /// Game board
-#[derive(Copy, Clone, Debug)]
-pub struct Board([Square; WIDTH * HEIGHT]);
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+pub struct Board(pub [Square; WIDTH * HEIGHT]);
 
 impl Board {
     /// Create an empty board
