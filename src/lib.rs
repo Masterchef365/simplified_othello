@@ -141,7 +141,7 @@ const DIRECTIONS: [(isize, isize); 8] = [
 
 /// Game board
 #[derive(Copy, Clone, Debug)]
-pub struct Board([Square; WIDTH * HEIGHT]);
+pub struct Board(pub [Square; WIDTH * HEIGHT]);
 
 impl Board {
     /// Create an empty board
