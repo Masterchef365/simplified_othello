@@ -34,14 +34,15 @@ fn main() {
         }
 
         // Ply
+        let minimax_fail = "Failed to find successor state, this should be unreachable...";
         state = match state.next_player {
             Player::Dark => match dark_player {
                 PlayerType::Human => human_player(&legal),
-                PlayerType::Minimax => minimax(state),
+                PlayerType::Minimax => minimax(state).expect(minimax_fail),
             },
             Player::Light => match light_player {
                 PlayerType::Human => human_player(&legal),
-                PlayerType::Minimax => minimax(state),
+                PlayerType::Minimax => minimax(state).expect(minimax_fail),
             },
         }
     }
